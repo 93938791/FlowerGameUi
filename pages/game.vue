@@ -228,7 +228,7 @@ const isDownloading = ref(false)
 const downloadTasks = ref<any[]>([])
 
 // Java 相关状态
-const checkingJava = ref(false)
+const checkingJava = ref(true)
 const javaInstalled = ref(false)
 const javaVersion = ref('')
 const installingJava = ref(false)
