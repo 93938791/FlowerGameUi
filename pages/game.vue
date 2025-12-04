@@ -20,7 +20,7 @@
             </div>
          </div>
          
-         <div class="java-install-box" v-if="!checkingJava">
+         <div class="java-install-box">
             <div class="install-info">
                 <p>Minecraft 运行需要 Java 环境。</p>
                 <p>推荐安装 <strong>Microsoft OpenJDK 21</strong> (兼容高版本 MC)</p>
@@ -228,7 +228,7 @@ const isDownloading = ref(false)
 const downloadTasks = ref<any[]>([])
 
 // Java 相关状态
-const checkingJava = ref(true)
+const checkingJava = ref(false)
 const javaInstalled = ref(false)
 const javaVersion = ref('')
 const installingJava = ref(false)
