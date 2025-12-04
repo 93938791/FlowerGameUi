@@ -59,7 +59,7 @@
                       @click.stop="translateDescription(res)" 
                       class="translate-btn" 
                       title="点击翻译">
-                  🌐
+                  <img src="/icons/语言翻译.png" alt="翻译" class="translate-icon" />
                 </span>
                 <span v-if="res.translating" class="loading-spinner-xs"></span>
               </div>
@@ -1489,5 +1489,24 @@ onMounted(() => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
+}
+
+.translate-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.translate-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.translate-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 </style>
