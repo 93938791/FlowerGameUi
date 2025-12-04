@@ -7,6 +7,9 @@
     <!-- Toast 提示 -->
     <Toast :show="toast.show" :message="toast.message" :type="toast.type" />
     
+    <!-- 下载进度条 -->
+    <DownloadProgress />
+
     <!-- Sidebar 导航 -->
     <Sidebar 
       :account-info="accountInfo"
@@ -105,9 +108,11 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useAuth } from './composables/useAuth'
 import { useToast } from './composables/useToast'
 import { useBackend } from './composables/useBackend'
+import { useDownload } from './composables/useDownload'
 import Toast from './components/Toast.vue'
 import Sidebar from './components/Sidebar.vue'
 import LoadingPage from './components/LoadingPage.vue'
+import DownloadProgress from './components/DownloadProgress.vue'
 
 // 全局网络状态管理
 import { provide } from 'vue'
@@ -115,6 +120,10 @@ import { provide } from 'vue'
 const { accountInfo, offlineAccount, isAuthenticating, deviceCodeData, authProgress, loadAccountFromCache, loadOfflineFromCache, logout, logoutOffline } = useAuth()
 const { toast, showToast } = useToast()
 const { fetchApi, init: initBackend, isConnected: isBackendConnected, networkStatus } = useBackend()
+const { initDownloadListener } = useDownload()
+
+// 初始化下载监听器
+initDownloadListener()
 
 const showOfflineLogin = ref(false)
 const offlineName = ref('')
