@@ -23,7 +23,22 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
   app: {
-    // baseURL: '/web/'
+    // baseURL: '/web/',
+    head: {
+      script: [
+        {
+          children: `
+            var _hmt = _hmt || [];
+            (function() {
+              var hm = document.createElement("script");
+              hm.src = "https://hm.baidu.com/hm.js?946ddeeca8c50a636efa33a0d1900529";
+              var s = document.getElementsByTagName("script")[0];
+              s.parentNode.insertBefore(hm, s);
+            })();
+          `
+        }
+      ]
+    }
   },
   build: {
     transpile: ['naive-ui', 'vueuc', '@css-render/vue3-ssr', '@juggle/resize-observer']
