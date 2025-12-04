@@ -20,7 +20,7 @@
             </div>
          </div>
          
-         <div class="java-install-box" v-if="!checkingJava && !javaInstalled">
+         <div class="java-install-box" v-if="!checkingJava">
             <div class="install-info">
                 <p>Minecraft 运行需要 Java 环境。</p>
                 <p>推荐安装 <strong>Microsoft OpenJDK 21</strong> (兼容高版本 MC)</p>
