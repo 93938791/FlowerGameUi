@@ -18,6 +18,12 @@
         <p class="single-line">如果您尚未启动 FlowerGame 桌面客户端，请先启动它。</p>
         <p class="single-line">如果客户端已运行，请稍候...</p>
       </div>
+
+      <div class="download-section">
+        <a href="https://gitee.com/zc_nmg/FlowerGame/releases/download/1.0.0/FlowerGame.exe" class="download-link" target="_blank">
+          <span class="icon">⬇️</span> 下载最新客户端
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -140,5 +146,34 @@
 .single-line {
   white-space: nowrap;
   margin: 4px 0;
+}
+
+.download-section {
+  margin-top: 24px;
+}
+
+.download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.download-link:hover {
+  background: rgba(34, 197, 94, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.download-link .icon {
+  font-size: 1.1em;
 }
 </style>
