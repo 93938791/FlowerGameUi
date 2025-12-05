@@ -9,6 +9,9 @@
         <NuxtLink to="/" class="qq-btn qq-btn-primary mt-4">
           前往启动 EasyTier
         </NuxtLink>
+        <button @click="startSyncthing" class="qq-btn qq-btn-secondary mt-4" style="margin-left: 8px;">
+          开启 Syncthing
+        </button>
       </div>
     </div>
 
@@ -21,6 +24,10 @@
       <button @click="openShareModal" class="qq-btn qq-btn-primary share-btn" :disabled="!networkStatus.connected">
         <span class="btn-icon">📤</span>
         同步我的存档
+      </button>
+      <button @click="startSyncthing" class="qq-btn qq-btn-secondary" style="margin-left: 8px;">
+        <span class="btn-icon">🔌</span>
+        开启 Syncthing
       </button>
     </div>
 
@@ -187,10 +194,10 @@
             <div class="form-group">
               <label>选择本地存放位置</label>
               <div class="input-group">
-                <input type="text" v-model="connectLocalPath" placeholder="选择或输入本地路径" readonly>
-                <button @click="selectLocalDir" class="qq-btn qq-btn-sm">📂 选择</button>
+                <input type="text" v-model="connectLocalPath" placeholder="输入本地目录路径，例如 C:\\Users\\你的用户名\\AppData\\Roaming\\.minecraft\\versions\\1.20.1\\saves\\存档名">
+                <button @click="browserPickDir" class="qq-btn qq-btn-sm">📂 浏览器选择</button>
               </div>
-              <p class="hint">建议选择对应版本的 saves 目录下的同名文件夹</p>
+              <p class="hint">提示：如果浏览器无法获取绝对路径，请手动填写完整路径。</p>
             </div>
           </div>
           
@@ -266,10 +273,8 @@ async function refreshSyncStatus() {
     const r = await fetchApi('/api/sync/status')
     const res = await r.json()
     if (res.ok) {
-      // 判断是否运行中：如果有连接或有文件夹且easytier在运行
-      // 这里简化判断，只要能获取到状态就认为在运行
       syncStatus.value = {
-        running: true,
+        running: !!res.running,
         folders: res.folders || []
       }
     } else {
@@ -340,16 +345,7 @@ async function confirmShare() {
 function openConnectModal(share: any) {
   targetShare.value = share
   showConnectModal.value = true
-  connectLocalPath.value = '' // 重置，或尝试猜测路径
-  
-  // 尝试解析 folder_id 来猜测路径
-  // ID格式: save-{version}-{name}
-  const parts = share.folder_id.split('-')
-  if (parts.length >= 3 && parts[0] === 'save') {
-    // 这是一个标准格式的存档分享
-    // 我们可以尝试调用API获取Minecraft目录，然后构造路径
-    // 这里简单处理，先留空，让用户选择目录
-  }
+  connectLocalPath.value = ''
 }
 
 function closeConnectModal() {
@@ -357,12 +353,15 @@ function closeConnectModal() {
   targetShare.value = null
 }
 
-async function selectLocalDir() {
+async function browserPickDir() {
   try {
-    const r = await fetchApi('/api/minecraft/select-dir')
-    const res = await r.json()
-    if (res.ok) {
-      connectLocalPath.value = res.path
+    const anyWindow = window as any
+    if (anyWindow && typeof anyWindow.showDirectoryPicker === 'function') {
+      const handle = await anyWindow.showDirectoryPicker()
+      connectLocalPath.value = connectLocalPath.value || handle.name
+      showToast('已选择目录，请在输入框中完善绝对路径', 'info')
+    } else {
+      showToast('浏览器不支持目录选择，请手动输入路径', 'error')
     }
   } catch (e: any) {
     showToast(`选择目录失败: ${e.message}`, 'error')
@@ -398,6 +397,22 @@ async function confirmConnect() {
     showToast(`连接失败: ${e.message}`, 'error')
   } finally {
     submitting.value = false
+  }
+}
+
+async function startSyncthing() {
+  try {
+    const r = await fetchApi('/api/syncthing/start', { method: 'POST' })
+    const res = await r.json()
+    if (res.ok) {
+      showToast('Syncthing 已启动', 'success')
+      refreshSyncStatus()
+      refreshNetworkShares()
+    } else {
+      showToast(res.error || '启动失败', 'error')
+    }
+  } catch (e: any) {
+    showToast(`启动失败: ${e.message}`, 'error')
   }
 }
 

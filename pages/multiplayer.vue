@@ -189,7 +189,7 @@
               <button 
                 @click="openCreateRoomModal" 
                 class="create-room-btn"
-                :disabled="!selectedLaunchVersion || !hasAccount || currentRoom"
+                :disabled="!selectedLaunchVersion || currentRoom"
               >
                 <span class="btn-icon">🌐</span>
                 <span class="btn-text">{{ currentRoom ? '房间运行中' : '创建联机房间' }}</span>
@@ -718,8 +718,16 @@ function openCreateRoomModal() {
     showToast('请先选择游戏版本', 'error')
     return
   }
+  if (!hasAccount.value && !isNetworkConnected.value) {
+    showToast('无法进行游戏联机，请先加入 Easytier 网络并登录账号', 'error')
+    return
+  }
   if (!hasAccount.value) {
     showToast('请先登录账号', 'error')
+    return
+  }
+  if (!isNetworkConnected.value) {
+    showToast('请先在「网络管理」中启动 Easytier 网络', 'error')
     return
   }
   showCreateRoomModal.value = true
