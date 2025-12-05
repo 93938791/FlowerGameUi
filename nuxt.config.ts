@@ -18,17 +18,26 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: false,
+  css: [
+    'primevue/resources/themes/saga-blue/theme.css',
+    'primevue/resources/primevue.min.css',
+    'primeicons/primeicons.css'
+  ],
   app: {
     // baseURL: '/web/',
     head: {
     }
   },
   build: {
-    transpile: ['naive-ui', 'vueuc', '@css-render/vue3-ssr', '@juggle/resize-observer']
+    transpile: ['naive-ui', 'vueuc', '@css-render/vue3-ssr', '@juggle/resize-observer', 'primevue']
   },
   // 开发服务器配置
   devServer: {
@@ -52,6 +61,11 @@ export default defineNuxtConfig({
   // },
   // Vite 配置
   vite: {
+    resolve: {
+      alias: {
+        '#app-manifest': resolve(__dirname, 'app-manifest.js')
+      }
+    },
     server: {
       // 禁用代理，因为我们现在直接连接本地后端
       // proxy: {
@@ -79,6 +93,17 @@ export default defineNuxtConfig({
       //     }
       //   }
       // }
-    }
+    },
+    plugins: [
+      {
+        name: 'nuxt-app-manifest-shim',
+        resolveId(id) {
+          if (id === '#app-manifest') return id
+        },
+        load(id) {
+          if (id === '#app-manifest') return 'export default {}'
+        }
+      }
+    ]
   }
 })

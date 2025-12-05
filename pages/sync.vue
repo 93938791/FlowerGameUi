@@ -9,9 +9,6 @@
         <NuxtLink to="/" class="qq-btn qq-btn-primary mt-4">
           前往启动 EasyTier
         </NuxtLink>
-        <button @click="startSyncthing" class="qq-btn qq-btn-secondary mt-4" style="margin-left: 8px;">
-          开启 Syncthing
-        </button>
       </div>
     </div>
 
@@ -24,10 +21,6 @@
       <button @click="openShareModal" class="qq-btn qq-btn-primary share-btn" :disabled="!networkStatus.connected">
         <span class="btn-icon">📤</span>
         同步我的存档
-      </button>
-      <button @click="startSyncthing" class="qq-btn qq-btn-secondary" style="margin-left: 8px;">
-        <span class="btn-icon">🔌</span>
-        开启 Syncthing
       </button>
     </div>
 
@@ -142,10 +135,6 @@
                 :class="{ selected: selectedSave === save, shared: save.is_shared }"
                 @click="!save.is_shared && selectSave(save)"
               >
-                <div class="save-icon">
-                  <img v-if="save.has_icon" :src="getSaveIconUrl(save)" alt="icon" />
-                  <span v-else>📦</span>
-                </div>
                 <div class="save-info">
                   <div class="save-name">{{ save.name }}</div>
                   <div class="save-version">版本: {{ save.version_id }}</div>
@@ -195,7 +184,7 @@
               <label>选择本地存放位置</label>
               <div class="input-group">
                 <input type="text" v-model="connectLocalPath" placeholder="输入本地目录路径，例如 C:\\Users\\你的用户名\\AppData\\Roaming\\.minecraft\\versions\\1.20.1\\saves\\存档名">
-                <button @click="browserPickDir" class="qq-btn qq-btn-sm">📂 浏览器选择</button>
+                <button @click="openDirPicker" class="qq-btn qq-btn-sm">📂 选择目录</button>
               </div>
               <p class="hint">提示：如果浏览器无法获取绝对路径，请手动填写完整路径。</p>
             </div>
@@ -214,11 +203,13 @@
         </div>
       </div>
     </Teleport>
+    <DirectoryPickerWin :visible="directoryPickerVisible" :initial-path="connectLocalPath" @update:visible="(v)=> directoryPickerVisible = v" @confirm="onDirSelected" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import DirectoryPickerWin from '../components/DirectoryPickerWin.vue'
 import { useBackend } from '../composables/useBackend'
 import { useToast } from '../composables/useToast'
 
@@ -353,20 +344,10 @@ function closeConnectModal() {
   targetShare.value = null
 }
 
-async function browserPickDir() {
-  try {
-    const anyWindow = window as any
-    if (anyWindow && typeof anyWindow.showDirectoryPicker === 'function') {
-      const handle = await anyWindow.showDirectoryPicker()
-      connectLocalPath.value = connectLocalPath.value || handle.name
-      showToast('已选择目录，请在输入框中完善绝对路径', 'info')
-    } else {
-      showToast('浏览器不支持目录选择，请手动输入路径', 'error')
-    }
-  } catch (e: any) {
-    showToast(`选择目录失败: ${e.message}`, 'error')
-  }
-}
+const directoryPickerVisible = ref(false)
+function openDirPicker(){ directoryPickerVisible.value = true }
+function onDirSelected(path: string){ connectLocalPath.value = path; directoryPickerVisible.value = false }
+
 
 async function confirmConnect() {
   if (!targetShare.value || !connectLocalPath.value) return
@@ -440,9 +421,9 @@ function getSaveIconUrl(save: any) {
 }
 
 .panel-section {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 20px;
   backdrop-filter: blur(10px);
@@ -457,7 +438,7 @@ function getSaveIconUrl(save: any) {
 }
 
 .header-desc {
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 4px 0 0 0;
   font-size: 14px;
 }
@@ -467,14 +448,14 @@ function getSaveIconUrl(save: any) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #334155;
+  border-bottom: 2px solid var(--border-light);
   padding-bottom: 14px;
 }
 
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -513,11 +494,12 @@ function getSaveIconUrl(save: any) {
 }
 
 .share-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
   padding: 16px;
   transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .share-card:hover {
@@ -536,12 +518,10 @@ function getSaveIconUrl(save: any) {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
-.share-status {
-  color: #3b82f6;
-}
+.share-status { color: var(--color-primary); }
 
 .share-status.connected {
   color: #22c55e;
@@ -563,7 +543,7 @@ function getSaveIconUrl(save: any) {
 
 .folder-label {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -572,7 +552,7 @@ function getSaveIconUrl(save: any) {
 
 .folder-id {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: monospace;
 }
 
@@ -721,16 +701,6 @@ function getSaveIconUrl(save: any) {
   cursor: not-allowed;
 }
 
-.save-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  font-size: 20px;
-}
 
 .save-info {
   flex: 1;
@@ -950,4 +920,21 @@ function getSaveIconUrl(save: any) {
   opacity: 0.6;
   pointer-events: none;
 }
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: rgba(0,0,0,0.2);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.crumb {
+  color: #e2e8f0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.crumb:hover { color: #22c55e; }
+.sep { color: #94a3b8; }
 </style>

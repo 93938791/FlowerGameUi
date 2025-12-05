@@ -214,6 +214,13 @@
         </div>
       </div>
     </div>
+
+    <!-- Directory Picker -->
+    <DirectoryPickerWin 
+      v-model:visible="showDirPicker" 
+      @confirm="onDirSelected"
+      :initial-path="downloadConfig.path"
+    />
   </div>
 </template>
 
@@ -222,6 +229,7 @@ import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useBackend } from '@/composables/useBackend'
 import { useWebSocket } from '@/composables/useWebSocket'
 import { useDownload } from '@/composables/useDownload'
+import DirectoryPickerWin from '@/components/DirectoryPickerWin.vue'
 
 const { fetchApi } = useBackend()
 const { messages } = useWebSocket()
@@ -264,6 +272,9 @@ const downloadConfig = ref({
   loaders: [] as string[] // Resource loaders (e.g. ['fabric'])
 })
 const validationWarning = ref('')
+
+// Directory Picker State
+const showDirPicker = ref(false)
 
 // Version Modal State
 const showVersionModal = ref(false)
@@ -438,16 +449,13 @@ const validateVersion = () => {
   }
 }
 
-const selectDownloadDir = async () => {
-  try {
-    const response = await fetchApi('/api/minecraft/select-dir')
-    const data = await response.json()
-    if (data.ok) {
-      downloadConfig.value.path = data.path
-    }
-  } catch (e) {
-    console.error('Select dir failed', e)
-  }
+const selectDownloadDir = () => {
+  showDirPicker.value = true
+}
+
+const onDirSelected = (path: string) => {
+  downloadConfig.value.path = path
+  showDirPicker.value = false
 }
 
 const startDownload = async () => {
